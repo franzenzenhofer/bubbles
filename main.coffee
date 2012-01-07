@@ -1,11 +1,22 @@
 #CONSTANTS
 CANVAS_WIDTH = 800
 CANVAS_HEIGHT = 600
-ENEMIES_PROPABILITY = 0.05
+ENEMIES_PROPABILITY = 0.2
 DEFAULT_SPEED = 0.5
 DEFAULT_USER_SPEED = 0.1
-MAX_NUMBER_ENEMIES = 100
-
+MAX_NUMBER_ENEMIES = 10
+DEFAULT_LINE_WIDTH = 2
+DEFAULT_FILL_STYLE = 'black'
+DEFAULT_STROKE_STYLE = 'black'
+DEFAULT_POSITIVE_CIRCLE_JOIN_RATE = 0.5
+DEFAULT_NEGATIVE_CIRCLE_JOIN_RATE = 1
+MINIMAL_VIABLE_RADIUS = 1
+MAX_ENEMY_RADIUS = 750
+NEW_ENEMY_PROPABILITY = 0.01
+BULLET_SHOOTER_RATIO = 0.2
+SHOOTER_SHOOT_LOSS = 0.01
+PROPORTION_MAX_NEW_ENEMY_SIZE = 2.0
+MIN_NEW_ENEMY_SIZE = MINIMAL_VIABLE_RADIUS
 #INIT
 ##defining the game canvas
 ge = game_element = $("<canvas width='#{CANVAS_WIDTH}' height='#{CANVAS_HEIGHT}'></canvas>")
@@ -13,70 +24,36 @@ gc = game_canvas = game_element.get(0)
 gcc = game_canvas_context = game_canvas.getContext("2d")
 
 
+#game globals
+game = @
+bullets = []
+enemies = []
+explosions = []
+player1 = {}
+s_t_a_r_t = false
+
+
 #GLOBAL CLASSES
 
 #an abstract class for all game objects in the game
-
 class InGameObject
-  constructor: (@active=true, @fill_style='#000', @stroke_style='#000') ->
+  constructor: (@active=true, @fill_style=DEFAULT_FILL_STYLE, @stroke_style=DEFAULT_STROKE_STYLE, @line_width=DEFAULT_LINE_WIDTH) ->
+    gcc.fillStyle = @fills_style
+    gcc.strokeStyle = @stroke_style
+    gcc.lineWidth = @line_width
 
 class MovingInGameObject extends InGameObject
-  constructor: (@x, @y, @x_velocity = 0, @y_velocity = 0, fill_style, stroke_style, active) ->
-    super(active, fill_style, stroke_style)
+  constructor: (@x, @y, @x_velocity = 0, @y_velocity = 0, fill_style, stroke_style, line_width, active) ->
+    super(active, fill_style, stroke_style, line_width)
 
   update: =>
     @x += @x_velocity
     @y += @y_velocity
 
 
-# currently supports two shapes, rectangles and circles
-#class MovingInGameObject_deprecated
-#  constructor: (@x, @y,  rect_circle, @xVelocity=0, @yVelocity=0, @color = '#000', @active = true) ->
-#    {@width, @height} = rect_circle
-#    {@radius} = rect_circle
-#
-#    #for some things we need a to simulate a box
-#    if @radius
-#      @cx = @x+0
-#      @cy = @y+0
-#      @setCircleBox()
-#
-#  inBounds: =>
-#    @x >= 0 and
-#    @x <= CANVAS_WIDTH and
-#    @y >= 0 and
-#    @y <= CANVAS_HEIGHT
-#
-#  update: =>
-#    if @radius
-#      @cx += @xVelocity
-#      @cy += @yVelocity
-#      @setCircleBox()
-#    else
-#      @x += @xVelocity
-#      @y += @yVelocity
-#
-#    @active = @active and @inBounds()
-#
-#  draw: =>
-#    #console.log('draw')
-#    gcc.fillStyle = @color
-#    gcc.lineWidth = 1
-#    #gcc.fillRect(@x, @y, @width, @height)
-#    if @radius
-#      gcc.fillCircle(@cx, @cy, @radius)
-#      #gcc.strokeRect(@x, @y, @width, @height)
-#    else
-#      gcc.fillRect(@x, @y, @width, @height)
-#
-#  setCircleBox: =>
-#    @width = @height = @radius * 2
-#    @x = @cx - @radius
-#    @y = @cy - @radius
-
 class RectangleMovingInGameObject extends MovingInGameObject
-  constructor: (x, y, @width, @height, x_velocity, y_velocity, fill_style, stroke_style, active) ->
-    super(x, y, x_velocity, y_velocity, fill_style, stroke_style, active)
+  constructor: (x, y, @width, @height, x_velocity, y_velocity, fill_style, stroke_style, line_width, active) ->
+    super(x, y, x_velocity, y_velocity, fill_style, stroke_style, line_width, active)
 
   inBounds: =>
     @x >= 0 and
@@ -84,17 +61,33 @@ class RectangleMovingInGameObject extends MovingInGameObject
     @y >= 0 and
     @y <= CANVAS_HEIGHT
 
+  getF: =>
+    @radius*@radius*Math.PI
+
+  setF: (newF) =>
+    @radius = Math.sqrt(newF/Math.PI)
+
+  addF: (plusF) =>
+    @setF(@getF()+plusF)
+
+
   update: =>
     super()
-    @active = @active and @inBounds()
+    @testViability()
 
-  draw: =>
-    gcc.fillStyle = @fill_style
-    gcc.fillRect(@x, @y, @width, @height)
+  testViability: =>
+    @active = @active and inBounds()
+
+  draw: (fill=true, stroke=false) =>
+    if fill
+      gcc.fillStyle = @fill_style
+      gcc.fillRect(@x, @y, @width, @height)
+    if stroke
+      gcc.strokeStyle = @stroke_style
+      gcc.strokeRect(@x,@y,@width,@height)
 
 class CircleMovingInGameObject extends RectangleMovingInGameObject
   constructor: (@cx, @cy, @radius, x_velocity, y_velocity, fill_style, stroke_style, active) ->
-    #console.log(@cx)
     @setCircleBox()
     super(@x, @y, @width, @height, x_velocity, y_velocity, fill_style, stroke_style, active)
 
@@ -108,41 +101,101 @@ class CircleMovingInGameObject extends RectangleMovingInGameObject
     @cx += @x_velocity
     @cy += @y_velocity
     @setCircleBox()
-    #console.log(@active)
-    super()
-    #console.log(@active)
 
+    if @inBounds() is false
+      if @cx < 0
+        @cx = CANVAS_WIDTH + (@cx * -1)
+      else if @cx > CANVAS_WIDTH
+        @cx = (@cx - CANVAS_WIDTH) * -1
+
+      if @cy < 0
+        @cy = CANVAS_HEIGHT + (@cy * -1)
+      else if @cy > CANVAS_HEIGHT
+        @cy = (@cy - CANVAS_HEIGHT) * -1
+
+    super()
+
+    #limiting the potential radius of a bubble
+    #@radius = MAX_ENEMY_RADIUS if @radius > MAX_ENEMY_RADIUS
+
+    @testViability()
+
+  testViability: =>
+    @active = @active and @radius > MINIMAL_VIABLE_RADIUS
 
   draw: (fill=true, stroke=false, drawbox=false) =>
-    #console.log('circledraw')
-    #console.log(@cx+' '+@cy+' '+@radius) if debug
+    super(false,true) if drawbox
     if fill
-      gcc.fillStyle = @fill_style
+      gcc.fillStyle = @fill_style?.toString()
       gcc.fillCircle(@cx, @cy, @radius)
 
     if stroke
-      gcc.lineWidth = 2
       gcc.strokeStyle = @stroke_style
       gcc.strokeCircle(@cx, @cy, @radius)
 
-    (gcc.stokeStyle = @stroke_style; gcc.lineWidth = 1; gcc.strokeRect(@x, @y, @width, @height)) if drawbox
+   #super(false,true)
+
+  inBounds: =>
+    @cx > (@radius * -1) and
+    @cx < (CANVAS_WIDTH + @radius) and
+    @cy > (@radius * -1) and
+    @cy < (CANVAS_HEIGHT + @radius)
+
+  join: (another_circle) =>
+    #console.log (@radius+' '+another_circle.radius)
+    return false if not @active
+    return false if not another_circle.active
+    return false if @radius < MINIMAL_VIABLE_RADIUS
+    return false if another_circle.radius < MINIMAL_VIABLE_RADIUS
+    winner = false
+    looser = false
+    if @radius > another_circle.radius
+      winner = @
+      looser = another_circle
+      #oldLooserF = another_circle.getF()
+      #another_circle.radius = another_circle.radius - DEFAULT_NEGATIVE_CIRCLE_JOIN_RATE
+      #newLooserF =  another_circle.getF()
+      #@addF(oldLooserF-newLooserF)
+      #@radius = @radius + DEFAULT_POSITIVE_CIRCLE_JOIN_RATE #if @radius < 100
+
+    else if @radius < another_circle.radius
+      winner = another_circle
+      looser = @
+      #another_circle.radius = another_circle.radius + DEFAULT_POSITIVE_CIRCLE_JOIN_RATE #  if another.radius < 100
+      #@radius = @radius - DEFAULT_NEGATIVE_CIRCLE_JOIN_RATE
+    else #bounce
+      #@x_velocity = @x_velocity * -1
+      #@y_velocity = @y_velocity * -1
+      if Math.random() > 0.5 then @explode() else another_circle.explode()
+
+    if (winner and looser)
+      oldLooserF =looser.getF()
+      looser.radius = looser.radius - DEFAULT_NEGATIVE_CIRCLE_JOIN_RATE
+      newLooserF =  looser.getF()
+      winner.addF(oldLooserF-newLooserF)
+
+    @testViability()
+
+  explode: =>
+    @active=false
+    explosions.push(new Explosion(@))
 
 
 #player
 class Player extends CircleMovingInGameObject
   constructor: (x, y, radius) ->
-    #console.log(x)
-#    super(50, 50, { width: 20, height: 20 }, 0, 1, '#0AA')
-    super(x, y, radius, 0, 0, 'red', 'black')
+
+
+    #super(x, y, radius, 0, 0, 'rgba(255,0,0,0.9)', 'black')
+    super(x, y, radius, 0, 0, new Rgba(255,0,0,0.9), 'black')
     @last_bullet_shot = 0
     @age = 0
   shoot: =>
     [x,y] = @gunpoint()
-    (bullets.push(new Bullet(x,y,@x_velocity*1.5, @y_velocity*1.5)); @last_bullet_shot = @age) if @last_bullet_shot + 10 < @age
-    @radius--
+    (bullets.push(new Bullet(x,y,@radius*BULLET_SHOOTER_RATIO,@x_velocity*2, @y_velocity*2)); @last_bullet_shot = @age) if @last_bullet_shot + 10 < @age
+    @radius = @radius * (1 - SHOOTER_SHOOT_LOSS)
 
   gunpoint: =>
-    #[@x+@width/2,@y+1]
     [@x+@width/2,@y+@height/2]
 
   update: =>
@@ -157,10 +210,6 @@ class Player extends CircleMovingInGameObject
     #if keydown.down then @cy += 5
     if keydown.down then @y_velocity = @y_velocity + DEFAULT_USER_SPEED
 
-    #clamp the player
-    @cx = @cx.clamp(@radius, CANVAS_WIDTH -  @radius)
-    @cy = @cy.clamp(@radius, CANVAS_HEIGHT - @radius)
-
     @setCircleBox()
 
     #player special movements
@@ -170,24 +219,37 @@ class Player extends CircleMovingInGameObject
   draw: =>
     super(true,true)
 
-  explode: =>
-    console.log('player explode')
 
+
+class Explosion extends CircleMovingInGameObject
+  constructor: (ex_circle) ->
+    super(ex_circle.cx, ex_circle.cy, ex_circle.radius, 0,0, ex_circle.fill_style, ex_circle.stroke_style)
+ # super(x, y, radius, x_velocity, y_velocity, 'yellow', 'black')
+
+  update: =>
+    #console.log(@)
+    #super()
+    #console.log(gcc)
+    if @fill_style.a
+      @fill_style.a = @fill_style.a - 0.05
+      if @fill_style.a <= 0 then @active = false
+    @radius = @radius + 10
+
+  draw: =>
+    super(true,true)
 
 
 class Bullet extends CircleMovingInGameObject
-  constructor: (x, y, x_velocity, y_velocity) ->
-    #super(@x, @y, { width:3, height:3 }, 0,  @speed)
-    super(x, y, 3, x_velocity, y_velocity, 'yellow', 'black')
+  constructor: (x, y, radius=3, x_velocity, y_velocity ) ->
+    super(x, y, radius, x_velocity, y_velocity, 'yellow', 'black')
 
   draw: =>
     super(true,true)
 
 #the bubbles
 class Enemy extends CircleMovingInGameObject
-  constructor: () ->
-
-    radius = 10+Math.random()*10
+  constructor: (radius = 10+Math.random()*10) ->
+    radius = MAX_ENEMY_RADIUS if radius > MAX_ENEMY_RADIUS
     #where to place the bubble
     where_to_place_the_bubble = Math.random()
     if where_to_place_the_bubble < 0.25
@@ -214,144 +276,91 @@ class Enemy extends CircleMovingInGameObject
       x = CANVAS_WIDTH + radius
       x_velocity = (DEFAULT_SPEED * -1)
       y_velocity = (DEFAULT_SPEED * -1) * Math.random()*(1+DEFAULT_SPEED)
-    #x = (radius * 2) + Math.random() * (CANVAS_WIDTH - radius * 2)
 
-    #we deploy the enemis ad y radius as the would be invalidated otherwise by the inBounds method of the Rectangle Object
-    #radius = 5+Math.random()*10
-    #y = radius
-    #super(@cx, @cy, @radius, x_velocity, y_velocity, color, active)
-    @age = Math.floor(Math.random()*128)
-    super(x, y, radius, x_velocity, y_velocity, 'rgba('+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+',0.7)', 'rgb(0,0,255)')
+    @age = 0
+    #new Rgba(255,0,0,0.9)
+    #super(x, y, radius, x_velocity, y_velocity, 'rgba('+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+','+Math.floor(Math.random()*255)+',0.7)', 'rgb(0,0,255)')
+    super(x, y, radius, x_velocity, y_velocity, new Rgba(Math.floor(Math.random()*255),Math.floor(Math.random()*255),Math.floor(Math.random()*255),0.7), 'rgb(0,0,255)')
 
   update: =>
-    #we need a new upate method, as we do not set outofbounds object to inactibe, but just swithc their position
-    @cx += @x_velocity
-    @cy += @y_velocity
-
-    @setCircleBox()
-    @x += @x_velocity
-    @y += @y_velocity
-
-    if @inBounds() is false
-      #console.log('out of bounds '+@x+' '+@y)
-      #@x = @x * -1
-      if @cx < 0
-        @cx = CANVAS_WIDTH + (@cx * -1)
-      else #if @cx > CANVAS_WIDTH
-        @cx = (@cx - CANVAS_WIDTH) * -1
-
-
-      if @cy < 0
-        @cy = CANVAS_HEIGHT + (@cy * -1)
-      else #if @cy > CANVAS_HEIGHT
-        @cy = (@cy - CANVAS_HEIGHT) * -1
-
-    #  @x_velocity = 3 * Math.sin(@age * Math.PI / (CANVAS_WIDTH/@radius) );
+    super()
     @stroke_style = 'black' if @radius > player1.radius
+    @stroke_style = 'darkred' if @radius >=  MAX_ENEMY_RADIUS
+    @stroke_style = 'blue' if @radius < player1.radius
 
-    #TODO make an explosion instead into four enemies
-    @stroke_style = 'red' if @radius >= 100
-    @age++
 
-  inBounds: =>
-    if @cx > (@radius * -1) and
-    @cx < (CANVAS_WIDTH + @radius) and
-    @cy > (@radius * -1) and
-    @cy < (CANVAS_HEIGHT + @radius)
-      #console.log('inbounds true')
-      return true
-    else
-      #console.log('inbounds false')
-      return false
 
-  explode: =>
-    console.log('explode')
-    @active=false
 
   draw: =>
     super(true, true)
 
-  join: (another) =>
-    #@radius = 100
-    if @radius > another.radius
-      #winner = @
-      @radius = @radius + 0.5 if @radius < 100
-      #@radius = @radius + (another.radius * 1.01)
-      another.radius--
-    else if @radius < another.radius
-      another.radius = another.radius + 0.5  if another.radius < 100
-      #another.radius = another.radius + (@radius * 1.01)
-      @radius--
-    else #bounce
-      console.log('same radius')
-      @x_velocity = @x_velocity * -1
-      @y_velocity = @y_velocity * -1
-      #@radius--
-      #another.radius--
-
-    @active = false if @radius < 4
-    another.active = false if another.radius < 4
+  join: (another_circle) =>
+    super(another_circle)
+    @radius = MAX_ENEMY_RADIUS if @radius >  MAX_ENEMY_RADIUS
 
 
 
 
 
-#game globals
-game = @
-bullets = []
-enemies = []
+
+
+
+
 
 
 
 
 #RUNTIME
 runtime = (time) ->
-  update()
-  draw()
-  #TODO: make a pollyfill for crossbrowser support
-  window.webkitRequestAnimationFrame(runtime, gc)
+    update()
+    draw()
+    #TODO: make a pollyfill for crossbrowser support
+    window.webkitRequestAnimationFrame(runtime, gc)
 
  #the update methode, executed before every draw
 update = ->
 
-  #player
-  player1.update()
-  #player2.update()
-  #we update all bullets and create a new bullets array
-  bullets = ( do -> (bullet.update(); bullet) for bullet in bullets when bullet.active)
-
-  #check to join enemies
   for enemy in enemies
     do (enemy) ->
-      for enemy2 in enemies when ((enemy2 isnt enemy) and rectCollides(enemy, enemy2) and (enemy2.active and enemy.active))
+      for enemy2 in enemies when ((enemy2 isnt enemy) and circleCollides(enemy, enemy2) and (enemy2.active and enemy.active))
         do (enemy) ->
           #console.log('enemy join')
           enemy.join(enemy2)
+
+  #check for player/enemy joins
+  for enemy in enemies when circleCollides(enemy, player1)
+   do (enemy) ->
+     player1.join(enemy)
+
+  #we test for bullet / enemy collision
+  for bullet in bullets
+    do (bullet) ->
+     (enemy.explode(); bullet.active=false) for enemy in enemies when circleCollides(bullet, enemy)
 
   #we update all enemies and create a new enemies array
   #console.log(enemies)
   enemies =  ( do -> (enemy.update(); enemy) for enemy in enemies when enemy.active)
 
-  #we test for bullet / enemy collision
-  for bullet in bullets
-    do (bullet) ->
-     (enemy.explode(); bullet.active=false) for enemy in enemies when rectCollides(bullet, enemy)
+  #we update all explosions
+  explosions =  ( do -> (explosion.update(); explosion) for explosion in explosions when explosion.active)
 
+  #we update all bullets and create a new bullets array
+  bullets = ( do -> (bullet.update(); bullet) for bullet in bullets when bullet.active)
 
-  for enemy in enemies when rectCollides(enemy, player1)
-   do (enemy) ->
-     if enemy.radius > player1.radius
-      #player1.catchedBy(enemy)
-     else
-      enemy.explode()
+  #player
+  player1.update()
 
   #now is a good time to -maybe- create a new enemy
   # TODO: add one to the number of enemies for every bullet fired
   if enemies.length < MAX_NUMBER_ENEMIES
-    enemies.push(new Enemy()) if Math.random() < 0.05
-
+    enemies.push(new Enemy(MIN_NEW_ENEMY_SIZE+Math.random()*(player1.radius*PROPORTION_MAX_NEW_ENEMY_SIZE))) if Math.random() < NEW_ENEMY_PROPABILITY
 
   #doesn't make sanes to return anything right now
+  #
+  #
+  #check if an end of game event occured
+  if player1.active == false then (start())
+  if player1.radius*1.2 > CANVAS_HEIGHT then (start())
   return
 
 #the main draw method, exectued after every update
@@ -359,13 +368,13 @@ draw = ->
   #console.log 'draw'
   gcc.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
-
+  player1.draw()
   #player2.draw()
   do bullet.draw for bullet in bullets
   #console.log(enemies)
   do enemy.draw for enemy in enemies
+  do explosion.draw for explosion in explosions
 
-  player1.draw()
 
 
 
@@ -379,8 +388,15 @@ rectCollides = (a,b) ->
   a.y + a.height > b.y
 
 #circleCollides
-
-
+circleCollides = (c1,c2) ->
+  if rectCollides(c1,c2)
+    #c2 = a2 + b2
+    a = c2.cx - c1.cx
+    b = c2.cy - c1.cy
+    c = Math.sqrt(a*a + b*b)
+    if (c - c1.radius - c2.radius) < 0
+      return true
+  return false
 
 
 
@@ -420,6 +436,15 @@ CanvasRenderingContext2D::strokeCircle = (x,y,radius) ->
   @arc(x,y,radius,0,2*Math.PI)
   @stroke()
 
+class Rgb
+  constructor: (@r=0,@g=0,@b=0) ->
+  toString: -> 'rgba('+@r+','+@g+','+@b+')'
+
+class Rgba extends Rgb
+  constructor: (r=0,g=0,b=0,@a=1) -> super(r,g,b)
+  toString: -> 'rgba('+@r+','+@g+','+@b+','+@a+')'
+
+
 #animator frame helper
 #window.requestAnimFrame = ((callback) ->
 #    return window.requestAnimationFrame ||
@@ -434,9 +459,21 @@ CanvasRenderingContext2D::strokeCircle = (x,y,radius) ->
 #START
 #adding the game canvas to the game
 $('#gamearea').append(game_element)
-player1 = new Player(50,50,20)
+#player1 = new Player(CANVAS_WIDTH/2,CANVAS_HEIGHT/2,20)
 
 #player2 = new Player(75,75,12)
 
 console.log(player1)
+
+
+start = ->
+  enemies = []
+  bullets = []
+  explosions = []
+  player1 = new Player(CANVAS_WIDTH/2,CANVAS_HEIGHT/2,20)
+
+
+start()
 runtime()
+
+#console.dir(webkitRequestAnimationFrame)
