@@ -484,7 +484,7 @@
   runtime = function(time) {
     update();
     draw();
-    return window.webkitRequestAnimationFrame(runtime, gc);
+    return window.requestAnimFrame(runtime, gc);
   };
 
   update = function() {

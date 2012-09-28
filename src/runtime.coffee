@@ -3,7 +3,7 @@ runtime = (time) ->
     update()
     draw()
     #TODO: make a pollyfill for crossbrowser support
-    window.webkitRequestAnimationFrame(runtime, gc)
+    window.requestAnimFrame(runtime, gc)
 
  #the update methode, executed before every draw
 update = ->
