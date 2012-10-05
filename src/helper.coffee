@@ -18,7 +18,8 @@ circleCollides = (c1,c2) ->
       return true
   return false
 
-
+maxEnemySize = (player) ->
+  return player.radius * PROPORTION_MAX_NEW_ENEMY_SIZE
 
 #helpers
 #keydown helper

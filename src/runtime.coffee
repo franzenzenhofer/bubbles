@@ -41,7 +41,7 @@ update = ->
 
   #now is a good time to -maybe- create a new enemy
   if enemies.length < MAX_NUMBER_ENEMIES
-    enemies.push(new Enemy(MIN_NEW_ENEMY_SIZE+Math.random()*(player1.radius*PROPORTION_MAX_NEW_ENEMY_SIZE))) if Math.random() < NEW_ENEMY_PROPABILITY
+    enemies.push(new Enemy(MIN_NEW_ENEMY_SIZE+Math.random()*maxEnemySize(player1))) if Math.random() < NEW_ENEMY_PROPABILITY
 
   #check if an end of game event occured
   if player1.active == false then (start())
