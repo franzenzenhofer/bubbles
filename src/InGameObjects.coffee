@@ -11,7 +11,7 @@ class MovingInGameObject extends InGameObject
   constructor: (@x, @y, @x_velocity = 0, @y_velocity = 0, fill_style, stroke_style, line_width, active) ->
     super(active, fill_style, stroke_style, line_width)
 
-  update: =>
+  update: ->
     @x += @x_velocity
     @y += @y_velocity
 
@@ -20,30 +20,30 @@ class RectangleMovingInGameObject extends MovingInGameObject
   constructor: (x, y, @width, @height, x_velocity, y_velocity, fill_style, stroke_style, line_width, active) ->
     super(x, y, x_velocity, y_velocity, fill_style, stroke_style, line_width, active)
 
-  inBounds: =>
+  inBounds: ->
     @x >= 0 and
     @x <= CANVAS_WIDTH and
     @y >= 0 and
     @y <= CANVAS_HEIGHT
 
-  getF: =>
+  getF: ->
     @radius*@radius*Math.PI
 
-  setF: (newF) =>
+  setF: (newF) ->
     @radius = Math.sqrt(newF/Math.PI)
 
-  addF: (plusF) =>
+  addF: (plusF) ->
     @setF(@getF()+plusF)
 
 
-  update: =>
+  update: ->
     super()
     @testViability()
 
-  testViability: =>
+  testViability: ->
     @active = @active and inBounds()
 
-  draw: (fill=true, stroke=false) =>
+  draw: (fill=true, stroke=false) ->
     if fill
       gcc.fillStyle = @fill_style
       gcc.fillRect(@x, @y, @width, @height)
@@ -57,12 +57,12 @@ class CircleMovingInGameObject extends RectangleMovingInGameObject
     super(@x, @y, @width, @height, x_velocity, y_velocity, fill_style, stroke_style, active)
 
   #we emulate a box around every circle to support some rectangle methods
-  setCircleBox: =>
+  setCircleBox: ->
     @width = @height = @radius * 2
     @x = @cx - @radius
     @y = @cy - @radius
 
-  update: =>
+  update: ->
     @cx += @x_velocity
     @cy += @y_velocity
     @setCircleBox()
@@ -85,28 +85,37 @@ class CircleMovingInGameObject extends RectangleMovingInGameObject
 
     @testViability()
 
-  testViability: =>
+  testViability: ->
     @active = @active and @radius > MINIMAL_VIABLE_RADIUS
 
-  draw: (fill=true, stroke=false, drawbox=false) =>
-    super(false,true) if drawbox
-    if fill
-      gcc.fillStyle = @fill_style?.toString()
-      gcc.fillCircle(@cx, @cy, @radius)
+  #draw: (fill=true, stroke=false, drawbox=false) ->
+  #  super(false,true) if drawbox
+  #  if fill
+  #    gcc.fillStyle = @fill_style?.toString()
+  #    gcc.fillCircle(@cx, @cy, @radius)
+  #
+  #  if stroke
+  #    gcc.strokeStyle = @stroke_style
+  #    gcc.strokeCircle(@cx, @cy, @radius)
 
-    if stroke
-      gcc.strokeStyle = @stroke_style
-      gcc.strokeCircle(@cx, @cy, @radius)
+  #streamlined version for better performance
+  draw: () ->
+    x=(0.5 + @cx) | 0
+    y=(0.5 + @cy) | 0
+    gcc.fillStyle = @fill_style.toString()
+    #gcc.fillCircle(x, y, @radius)
+    gcc.strokeStyle = @stroke_style
+    #gcc.strokeCircle( x, y, @radius)
+    gcc.drawCircle(x,y,@radius)
 
-   #super(false,true)
 
-  inBounds: =>
+  inBounds: ->
     @cx > (@radius * -1) and
     @cx < (CANVAS_WIDTH + @radius) and
     @cy > (@radius * -1) and
     @cy < (CANVAS_HEIGHT + @radius)
 
-  join: (another_circle) =>
+  join: (another_circle) ->
     #console.log (@radius+' '+another_circle.radius)
     return false if not @active
     return false if not another_circle.active
@@ -141,6 +150,6 @@ class CircleMovingInGameObject extends RectangleMovingInGameObject
 
     @testViability()
 
-  explode: =>
+  explode: ->
     @active=false
     explosions.push(new Explosion(@))

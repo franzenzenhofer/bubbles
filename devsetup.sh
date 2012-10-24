@@ -1,5 +1,5 @@
 #! /bin/bash
-cd ~/dev/games/bubbles/
+#cd ~/dev/games/bubbles/
 open . 
 sh build.sh
 open index.html

@@ -7,15 +7,15 @@ class Player extends CircleMovingInGameObject
     super(x, y, radius, 0, 0, new Rgba(255,0,0,0.9), 'black')
     @last_bullet_shot = 0
     @age = 0
-  shoot: =>
+  shoot: ->
     [x,y] = @gunpoint()
     (bullets.push(new Bullet(x,y,@radius*BULLET_SHOOTER_RATIO,@x_velocity*2, @y_velocity*2)); @last_bullet_shot = @age) if @last_bullet_shot + 10 < @age
     @radius = @radius * (1 - SHOOTER_SHOOT_LOSS)
 
-  gunpoint: =>
+  gunpoint: ->
     [@x+@width/2,@y+@height/2]
 
-  update: =>
+  update: ->
     @age++
     #player movements
     #if keydown.left then @cx -= 5
@@ -33,5 +33,5 @@ class Player extends CircleMovingInGameObject
     if keydown.space then @shoot()
     super()
 
-  draw: =>
+  draw: ->
     super(true,true)

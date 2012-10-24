@@ -3,7 +3,7 @@ class Explosion extends CircleMovingInGameObject
     super(ex_circle.cx, ex_circle.cy, ex_circle.radius, 0,0, ex_circle.fill_style, ex_circle.stroke_style)
  # super(x, y, radius, x_velocity, y_velocity, 'yellow', 'black')
 
-  update: =>
+  update: ->
     #console.log(@)
     #super()
     #console.log(gcc)
@@ -12,5 +12,5 @@ class Explosion extends CircleMovingInGameObject
       if @fill_style.a <= 0 then @active = false
     @radius = @radius + 10
 
-  draw: =>
+  draw: ->
     super(true,true)

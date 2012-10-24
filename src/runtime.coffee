@@ -6,6 +6,7 @@ runtime = (time) ->
     window.requestAnimFrame(runtime, gc)
 
  #the update methode, executed before every draw
+ #warning, this method if full of side effects
 update = ->
 
   #we check for coliding enemies
@@ -28,7 +29,9 @@ update = ->
      (enemy.explode(); bullet.active=false) for enemy in enemies when circleCollides(bullet, enemy)
 
   #we update all enemies and create a new enemies array
-  enemies =  ( do -> (enemy.update(); enemy) for enemy in enemies when enemy.active)
+  active_enemies =  ( do -> (enemy.update(); enemy) for enemy in enemies when enemy.active)
+  enemies = null
+  enemies = active_enemies
 
   #we update all explosions
   explosions =  ( do -> (explosion.update(); explosion) for explosion in explosions when explosion.active)

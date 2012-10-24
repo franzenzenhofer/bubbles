@@ -47,6 +47,8 @@ Number::clamp = (min, max) -> Math.min(Math.max(this, min), max)
 # a canvas full circle
 CanvasRenderingContext2D::fillCircle = (x,y,radius) ->
   #console.log(@)
+  #x = Math.floor(x)
+  #y = Math.floor(y)
   @beginPath()
   @arc(x,y,radius,0,2*Math.PI)
   @fill()
@@ -55,6 +57,12 @@ CanvasRenderingContext2D::strokeCircle = (x,y,radius) ->
   #console.log(@)
   @beginPath()
   @arc(x,y,radius,0,2*Math.PI)
+  @stroke()
+
+CanvasRenderingContext2D::drawCircle = (x,y,radius) ->
+  @beginPath()
+  @arc(x,y,radius,0,2*Math.PI)
+  @fill()
   @stroke()
 
 class Rgb
