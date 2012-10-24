@@ -19,13 +19,13 @@ class Player extends CircleMovingInGameObject
     @age++
     #player movements
     #if keydown.left then @cx -= 5
-    if keydown.left then @x_velocity = @x_velocity - DEFAULT_USER_SPEED
+    if keydown.left and -MAX_USER_SPEED <= @x_velocity then @x_velocity = @x_velocity - DEFAULT_USER_ACCELERATION
     #if keydown.right then @cx += 5
-    if keydown.right then @x_velocity = @x_velocity + DEFAULT_USER_SPEED
+    if keydown.right and @x_velocity <= MAX_USER_SPEED then @x_velocity = @x_velocity + DEFAULT_USER_ACCELERATION
     #if keydown.up then @cy -=5
-    if keydown.up then @y_velocity = @y_velocity - DEFAULT_USER_SPEED
+    if keydown.up and -MAX_USER_SPEED <= @y_velocity then @y_velocity = @y_velocity - DEFAULT_USER_ACCELERATION
     #if keydown.down then @cy += 5
-    if keydown.down then @y_velocity = @y_velocity + DEFAULT_USER_SPEED
+    if keydown.down and @y_velocity <= MAX_USER_SPEED then @y_velocity = @y_velocity + DEFAULT_USER_ACCELERATION
 
     @setCircleBox()
 
