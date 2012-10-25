@@ -36,9 +36,9 @@
 
   BULLET_SHOOTER_RATIO = 0.2;
 
-  SHOOTER_SHOOT_LOSS = 0.02;
+  SHOOTER_SHOOT_LOSS = 0.01;
 
-  PROPORTION_MAX_NEW_ENEMY_SIZE = 12.0;
+  PROPORTION_MAX_NEW_ENEMY_SIZE = 11.0;
 
   MIN_NEW_ENEMY_SIZE = MINIMAL_VIABLE_RADIUS;
 
@@ -59,6 +59,8 @@
   gc = game_canvas = game_element.get(0);
 
   gcc = game_canvas_context = game_canvas.getContext("2d");
+
+  gcc.globalCompositeOperation = "darker";
 
   InGameObject = (function() {
 
@@ -196,9 +198,10 @@
     };
 
     CircleMovingInGameObject.prototype.draw = function() {
-      var x, y;
+      var r, x, y;
       x = (0.5 + this.cx) | 0;
       y = (0.5 + this.cy) | 0;
+      r = (0.5 + this.radius) | 0;
       gcc.fillStyle = this.fill_style.toString();
       gcc.strokeStyle = this.stroke_style;
       return gcc.drawCircle(x, y, this.radius);
