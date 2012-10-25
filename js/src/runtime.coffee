@@ -5,8 +5,8 @@ runtime = (time) ->
     #TODO: make a pollyfill for crossbrowser support
     window.requestAnimFrame(runtime, gc)
 
- #the update methode, executed before every draw
- #warning, this method if full of side effects
+#the update methode, executed before every draw
+#warning, this method if full of side effects
 update = ->
 
   #we check for coliding enemies
@@ -44,19 +44,17 @@ update = ->
 
   #now is a good time to -maybe- create a new enemy
   if enemies.length < MAX_NUMBER_ENEMIES
-    enemies.push(new Enemy(Math.floor(MIN_NEW_ENEMY_SIZE+Math.random()*maxEnemySize(player1))) if Math.random() < NEW_ENEMY_PROPABILITY
-
+    new_enemy_size = Math.floor(MIN_NEW_ENEMY_SIZE+Math.random()*maxEnemySize(player1))
+    enemies.push(new Enemy(new_enemy_size)) if Math.random() < NEW_ENEMY_PROPABILITY
+  
   #check if an end of game event occured
-  if player1.active == false then (start())
+  if player1.active is false then (start())
   if player1.radius*1.2 > CANVAS_HEIGHT then (start())
   return
 
 #the main draw method, exectued after every update
 draw = ->
-
   gcc.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT)
-  #gcc.fillStyle = "rgba(0, 0, 0, 0.3)";
-  #gcc.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   #TODO the draw-method of the objects only deliver the information on what to draw, the actuall drawing is done by this method
   player1.draw()
   do bullet.draw for bullet in bullets

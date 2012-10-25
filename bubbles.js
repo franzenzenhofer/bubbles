@@ -38,7 +38,7 @@
 
   SHOOTER_SHOOT_LOSS = 0.01;
 
-  PROPORTION_MAX_NEW_ENEMY_SIZE = 11.0;
+  PROPORTION_MAX_NEW_ENEMY_SIZE = 12.0;
 
   MIN_NEW_ENEMY_SIZE = MINIMAL_VIABLE_RADIUS;
 
@@ -59,8 +59,6 @@
   gc = game_canvas = game_element.get(0);
 
   gcc = game_canvas_context = game_canvas.getContext("2d");
-
-  gcc.globalCompositeOperation = "darker";
 
   InGameObject = (function() {
 
@@ -204,7 +202,7 @@
       r = (0.5 + this.radius) | 0;
       gcc.fillStyle = this.fill_style.toString();
       gcc.strokeStyle = this.stroke_style;
-      return gcc.drawCircle(x, y, this.radius);
+      return gcc.drawCircle((0.5 + this.cx) | 0, (0.5 + this.cy) | 0, (0.5 + this.radius) | 0);
     };
 
     CircleMovingInGameObject.prototype.inBounds = function() {
@@ -429,7 +427,7 @@
   };
 
   update = function() {
-    var active_enemies, bullet, enemy, _fn, _fn1, _i, _j, _k, _len, _len1, _len2;
+    var active_enemies, bullet, enemy, new_enemy_size, _fn, _fn1, _i, _j, _k, _len, _len1, _len2;
     _fn = function(enemy) {
       var enemy2, _j, _len1, _results;
       _results = [];
@@ -507,8 +505,9 @@
     })();
     player1.update();
     if (enemies.length < MAX_NUMBER_ENEMIES) {
+      new_enemy_size = Math.floor(MIN_NEW_ENEMY_SIZE + Math.random() * maxEnemySize(player1));
       if (Math.random() < NEW_ENEMY_PROPABILITY) {
-        enemies.push(new Enemy(MIN_NEW_ENEMY_SIZE + Math.random() * maxEnemySize(player1)));
+        enemies.push(new Enemy(new_enemy_size));
       }
     }
     if (player1.active === false) {
@@ -557,7 +556,7 @@
   };
 
   maxEnemySize = function(player) {
-    return Math.sqrt(player.radius) * PROPORTION_MAX_NEW_ENEMY_SIZE;
+    return Math.floor(Math.sqrt(player.radius) * PROPORTION_MAX_NEW_ENEMY_SIZE);
   };
 
   window.keydown = {};
