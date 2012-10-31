@@ -7,6 +7,7 @@ closure_compiler = path_to_bin+'compiler.jar'
 html_compressor = path_to_bin+'htmlcompressor.jar'
 yui = path_to_bin+'yui.jar'
 #BUGGY
+###
 minHtmlReplace = (infile,outfile) ->
   jsdom.env({
     html: fs.readFileSync(infile)
@@ -78,18 +79,24 @@ collectCoffee= (infile) ->
       )
 
   })
-
+###
 srcfiles = ["js/src/init.coffee","js/src/InGameObjects.coffee","js/src/Player.coffee","js/src/Explosion.coffee","js/src/Bullet.coffee","js/src/Enemy.coffee","js/src/runtime.coffee","js/src/helper.coffee","js/src/start.coffee"]
 
 
 #coffee --watch --compile --output js/lib/ js/src/
-task 'watch', 'watch and compile coffeescript', ->
+task 'debug-watch', 'watch and compile coffeescript', ->
   exec 'coffee --watch --compile --output js/lib/ js/src/', (err, stdout, stderr) ->
     throw err if err
     console.log stdout + stderr
+
   
-task 'compile', 'compile coffeescript', ->
+task 'debug-compile', 'compile coffeescript', ->
   exec 'coffee --compile --output js/lib/ js/src/', (err, stdout, stderr) ->
+    throw err if err
+    console.log stdout + stderr
+
+task 'watch', 'watch, join and compile coffeescript', ->
+  exec 'coffee --watch --join bubbles.js --compile '+srcfiles.join(' '), (err, stdout, stderr) ->
     throw err if err
     console.log stdout + stderr
 
@@ -105,8 +112,8 @@ task 'join', 'join & compile coffeescript', ->
 
 task 'dev', 'set up dev envirement', ->
   
-task 'minjs', 'closure compile the javascript', ->
-  exec 'java -jar "'+closure_compiler+'" --compilation_level SIMPLE_OPTIMIZATIONS --js js/lib/bubble.js  --js_output_file js/lib/bubble.min.js', (err, stdout, stderr) ->
+task 'standalone', 'closure compile the javascript', ->
+  exec 'java -jar "'+closure_compiler+'" --compilation_level SIMPLE_OPTIMIZATIONS --js scripts/jquery.min.js scripts/jquery.hotkeys.js ./bubbles.js  --js_output_file ./bubbles-app.min.js', (err, stdout, stderr) ->
     throw err if err
     console.log stdout + stderr
   

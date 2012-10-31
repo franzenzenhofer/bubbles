@@ -18,7 +18,7 @@ canvas {border: 1px solid black}
 #intro {
     position:    absolute;
     width:       550px;
-    bottom:         5%;
+    top:         350px;
     left:        50%;    /* move the left edge to the center … */
     margin-left: -275px; /* … and move it to the left half the box’ width. */
     z-index:     9999;
@@ -85,29 +85,8 @@ kbd, kbd.light, .light-keys kbd, .key.light, .light-keys .key {
 <body>
 <center><div id="gamearea">
 </div></center>
-<script src="scripts/jquery.min.js"></script>
-<script src="scripts/jquery.hotkeys.js"></script>
-<script>    window.requestAnimFrame = (function(){
-      return  window.requestAnimationFrame       || 
-              window.webkitRequestAnimationFrame || 
-              window.mozRequestAnimationFrame    || 
-              window.oRequestAnimationFrame      || 
-              window.msRequestAnimationFrame     || 
-              function( callback ){
-                window.setTimeout(callback, 1000 / 60);
-              };
-    })();</script>
-<!--<script src="js/lib/init.js" coffee="js/src/init.coffee" min="__REMOVE__"></script>
-<script src="js/lib/InGameObjects.js" coffee="js/src/InGameObjects.coffee" min="__REMOVE__"></script>
-<script src="js/lib/Player.js" coffee="js/src/Player.coffee" min="__REMOVE__"></script>
-<script src="js/lib/Explosion.js" coffee="js/src/Explosion.coffee" min="__REMOVE__"></script>
-<script src="js/lib/Bullet.js" coffee="js/src/Bullet.coffee" min="__REMOVE__"></script>
-<script src="js/lib/Enemy.js" coffee="js/src/Enemy.coffee" min="__REMOVE__"></script>
-<script src="js/lib/runtime.js" coffee="js/src/runtime.coffee" min="__REMOVE__"></script>
-<script src="js/lib/helper.js" coffee="js/src/helper.coffee" min="__REMOVE__"></script>
-<script src="js/lib/start.js" coffee="js/src/start.coffee" min="__REMOVE__"></script>
-<script src="" min="bubbles.js" ></script>-->
-<script src="./bubbles.js"></script>
+
+<script src="./bubbles-app.min.js"></script>
 <div id="intro"><center><kbd class="arrow">◀</kbd> <kbd class="arrow">▲</kbd> <kbd class="arrow">▼</kbd > <kbd class="arrow" >▶</kbd> and <kbd>&nbsp;Space&nbsp;</kbd></center></div><script>window.setTimeout(function(){document.getElementById('intro').style.display='none'}, 2500)</script>
 
 
