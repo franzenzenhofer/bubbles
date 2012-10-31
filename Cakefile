@@ -113,12 +113,12 @@ task 'join', 'join & compile coffeescript', ->
 task 'dev', 'set up dev envirement', ->
   
 task 'standalone', 'closure compile the javascript', ->
-  exec 'java -jar "'+closure_compiler+'" --compilation_level SIMPLE_OPTIMIZATIONS --js scripts/jquery.min.js scripts/jquery.hotkeys.js ./bubbles.js  --js_output_file ./bubbles-app.min.js', (err, stdout, stderr) ->
+  exec 'java -jar "'+closure_compiler+'" --compilation_level SIMPLE_OPTIMIZATIONS --js scripts/jquery.min.js scripts/jquery.hotkeys.js scripts/requestanimationframe.js ./bubbles.js  --js_output_file ./bubbles-app.min.js', (err, stdout, stderr) ->
     throw err if err
     console.log stdout + stderr
   
 task 'mincss', 'minify the css', ->
-  exec "java -jar #{yui} -o css/lib/main.min.css css/src/main.css", (err, stdout, stderr) ->
+  exec "java -jar #{yui} -o css/main.min.css css/main.css", (err, stdout, stderr) ->
     throw err if err
     console.log stdout + stderr
   

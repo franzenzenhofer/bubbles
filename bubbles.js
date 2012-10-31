@@ -4,9 +4,9 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  CANVAS_WIDTH = 850;
+  CANVAS_WIDTH = $(window).width();
 
-  CANVAS_HEIGHT = 600;
+  CANVAS_HEIGHT = $(window).height();
 
   ENEMIES_PROPABILITY = 0.5;
 
@@ -59,6 +59,13 @@
   gc = game_canvas = game_element.get(0);
 
   gcc = game_canvas_context = game_canvas.getContext("2d");
+
+  $(window).resize(function() {
+    CANVAS_WIDTH = $(window).width();
+    CANVAS_HEIGHT = $(window).height();
+    gc.width = CANVAS_WIDTH;
+    return gc.height = CANVAS_HEIGHT;
+  });
 
   InGameObject = (function() {
 
@@ -421,9 +428,9 @@
   })(CircleMovingInGameObject);
 
   runtime = function(time) {
+    window.requestAnimationFrame(runtime, gc);
     update();
-    draw();
-    return window.requestAnimFrame(runtime, gc);
+    return draw();
   };
 
   update = function() {
@@ -637,10 +644,6 @@
     return Rgba;
 
   })(Rgb);
-
-  window.requestAnimFrame = (function() {}, window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
-    return window.setTimeout(callback, 1000 / 60);
-  });
 
   $('#gamearea').append(game_element);
 

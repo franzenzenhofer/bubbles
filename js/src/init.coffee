@@ -1,6 +1,6 @@
 #CONSTANTS
-CANVAS_WIDTH = 850
-CANVAS_HEIGHT = 600
+CANVAS_WIDTH = $(window).width() #850
+CANVAS_HEIGHT = $(window).height() #600
 ENEMIES_PROPABILITY = 0.5
 DEFAULT_SPEED = 0.5
 DEFAULT_USER_ACCELERATION = 0.1
@@ -32,6 +32,15 @@ s_t_a_r_t = false
 ge = game_element = $("<canvas width='#{CANVAS_WIDTH}' height='#{CANVAS_HEIGHT}'></canvas>")
 gc = game_canvas = game_element.get(0)
 gcc = game_canvas_context = game_canvas.getContext("2d")
+
+#resize the canvas if the window is resized
+$(window).resize(()->
+	#console.log('CANVAS_WIDTH:'+CANVAS_WIDTH+' CANVAS_HEIGHT'+CANVAS_HEIGHT)
+	CANVAS_WIDTH = $(window).width()
+	CANVAS_HEIGHT = $(window).height()
+	gc.width=CANVAS_WIDTH
+	gc.height=CANVAS_HEIGHT
+	)
 
 #gcc.globalCompositeOperation = "source-over";
 #gcc.fillStyle = "rgba(0, 0, 0, 0.3)";

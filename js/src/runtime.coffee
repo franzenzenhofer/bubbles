@@ -1,9 +1,9 @@
 #RUNTIME
 runtime = (time) ->
+    window.requestAnimationFrame(runtime, gc)
     update()
     draw()
-    #TODO: make a pollyfill for crossbrowser support
-    window.requestAnimFrame(runtime, gc)
+    
 
 #the update methode, executed before every draw
 #warning, this method if full of side effects

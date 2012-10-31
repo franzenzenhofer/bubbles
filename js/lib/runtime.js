@@ -3,9 +3,9 @@
   var draw, runtime, update;
 
   runtime = function(time) {
+    window.requestAnimationFrame(runtime, gc);
     update();
-    draw();
-    return window.requestAnimFrame(runtime, gc);
+    return draw();
   };
 
   update = function() {

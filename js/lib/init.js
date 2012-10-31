@@ -2,9 +2,9 @@
 (function() {
   var BULLET_SHOOTER_RATIO, CANVAS_HEIGHT, CANVAS_WIDTH, DEFAULT_FILL_STYLE, DEFAULT_LINE_WIDTH, DEFAULT_NEGATIVE_CIRCLE_JOIN_RATE, DEFAULT_POSITIVE_CIRCLE_JOIN_RATE, DEFAULT_SPEED, DEFAULT_STROKE_STYLE, DEFAULT_USER_ACCELERATION, ENEMIES_PROPABILITY, MAX_ENEMY_RADIUS, MAX_NUMBER_ENEMIES, MAX_USER_SPEED, MINIMAL_VIABLE_RADIUS, MIN_NEW_ENEMY_SIZE, NEW_ENEMY_PROPABILITY, PROPORTION_MAX_NEW_ENEMY_SIZE, SHOOTER_SHOOT_LOSS, bullets, enemies, explosions, game, game_canvas, game_canvas_context, game_element, gc, gcc, ge, player1, s_t_a_r_t;
 
-  CANVAS_WIDTH = 850;
+  CANVAS_WIDTH = $(window).width();
 
-  CANVAS_HEIGHT = 600;
+  CANVAS_HEIGHT = $(window).height();
 
   ENEMIES_PROPABILITY = 0.5;
 
@@ -57,5 +57,12 @@
   gc = game_canvas = game_element.get(0);
 
   gcc = game_canvas_context = game_canvas.getContext("2d");
+
+  $(window).resize(function() {
+    CANVAS_WIDTH = $(window).width();
+    CANVAS_HEIGHT = $(window).height();
+    gc.width = CANVAS_WIDTH;
+    return gc.height = CANVAS_HEIGHT;
+  });
 
 }).call(this);
