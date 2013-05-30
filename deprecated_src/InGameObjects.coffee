@@ -45,11 +45,15 @@ class RectangleMovingInGameObject extends MovingInGameObject
 
   draw: (fill=true, stroke=false) ->
     if fill
-      gcc.fillStyle = @fill_style
-      gcc.fillRect(@x, @y, @width, @height)
+      #gcc.fillStyle = @fill_style
+      #gcc.fillRect(@x, @y, @width, @height)
+      tcc.fillStyle = @fill_style
+      tcc.fillRect(@x, @y, @width, @height)
     if stroke
-      gcc.strokeStyle = @stroke_style
-      gcc.strokeRect(@x,@y,@width,@height)
+      #gcc.strokeStyle = @stroke_style
+      #gcc.strokeRect(@x,@y,@width,@height)
+      tcc.fillStyle = @fill_style
+      tcc.fillRect(@x, @y, @width, @height)
 
 class CircleMovingInGameObject extends RectangleMovingInGameObject
   constructor: (@cx, @cy, @radius, x_velocity, y_velocity, fill_style, stroke_style, active) ->
@@ -102,12 +106,14 @@ class CircleMovingInGameObject extends RectangleMovingInGameObject
   draw: () ->
     x=(0.5 + @cx) | 0
     y=(0.5 + @cy) | 0
-    gcc.fillStyle = @fill_style.toString()
-    #gcc.fillCircle(x, y, @radius)
-    gcc.strokeStyle = @stroke_style
-    #gcc.strokeCircle( x, y, @radius)
-    gcc.drawCircle(x,y,@radius)
-
+    #gcc.fillStyle = @fill_style.toString()
+    ##gcc.fillCircle(x, y, @radius)
+    #gcc.strokeStyle = @stroke_style
+    ##gcc.strokeCircle( x, y, @radius)
+    #gcc.drawCircle(x,y,@radius)
+    tcc.fillStyle = @fill_style.toString()
+    tcc.strokeStyle = @stroke_style
+    tcc.drawCircle(x,y,@radius)
 
   inBounds: ->
     @cx > (@radius * -1) and

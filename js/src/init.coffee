@@ -32,6 +32,10 @@ s_t_a_r_t = false
 ge = game_element = $("<canvas width='#{CANVAS_WIDTH}' height='#{CANVAS_HEIGHT}'></canvas>")
 gc = game_canvas = game_element.get(0)
 gcc = game_canvas_context = game_canvas.getContext("2d")
+#performance improvements tips
+#https://hacks.mozilla.org/2013/05/optimizing-your-javascript-game-for-firefox-os/
+#tc = document.createElement(“canvas”)
+#tcc = tc.getContext("2d")
 
 #resize the canvas if the window is resized
 $(window).resize(()->

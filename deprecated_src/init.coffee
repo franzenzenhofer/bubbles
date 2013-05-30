@@ -32,3 +32,5 @@ s_t_a_r_t = false
 ge = game_element = $("<canvas width='#{CANVAS_WIDTH}' height='#{CANVAS_HEIGHT}'></canvas>")
 gc = game_canvas = game_element.get(0)
 gcc = game_canvas_context = game_canvas.getContext("2d")
+tc = document.createElement(“canvas”)
+tcc = tc.getContext("2d")

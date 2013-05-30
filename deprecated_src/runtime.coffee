@@ -53,10 +53,12 @@ update = ->
 
 #the main draw method, exectued after every update
 draw = ->
-
-  gcc.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT)
+  tcc.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT)
+  #gcc.clearRect(0,0, CANVAS_WIDTH, CANVAS_HEIGHT)
   #TODO the draw-method of the objects only deliver the information on what to draw, the actuall drawing is done by this method
   player1.draw()
   do bullet.draw for bullet in bullets
   do enemy.draw for enemy in enemies
   do explosion.draw for explosion in explosions
+  gcc.drawImage(tcc,0,0)
+  console.log('new')
