@@ -1,11 +1,11 @@
-#Buubles - a little unfinished particle game
+# Buubles - a little unfinished particle game
 
-##just fork it
+## just fork it
 
 
 p.s.: i'm currently at lxjs 2012 in lisbabon, talk to me (if you like). also check out <a href="http://git.io/vienna.js">vienna.js</a> (awesome js meetup in vienna with couch surfing opportunity) 
 
-##MIT LICENSE
+## MIT LICENSE
 
 Copyright (c) 2012 Franz Enzenhofer
 
